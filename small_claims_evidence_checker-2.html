@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Small Claims Evidence Checker</title>
+<style>
+  :root{
+    --bg:#f7f7fb;
+    --card:#ffffff;
+    --ink:#1f2430;
+    --muted:#697386;
+    --line:#e5e7ef;
+    --accent:#6b5cff;
+    --accent2:#8a7dff;
+    --good:#1f8a4c;
+    --warn:#c47b00;
+    --bad:#b83a3a;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:linear-gradient(180deg,#f8f8fd 0%,#eef0f8 100%);
+    color:var(--ink);
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:28px 18px 48px;
+  }
+  .brand{
+    font-size:13px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:700;
+    margin-bottom:10px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:22px;
+    box-shadow:0 18px 40px rgba(35,42,75,.08);
+    padding:28px;
+  }
+  h1{
+    font-size:34px;
+    margin:0 0 10px;
+    line-height:1.1;
+  }
+  .intro{
+    color:var(--muted);
+    font-size:16px;
+    line-height:1.55;
+    margin-bottom:22px;
+  }
+  .progress{
+    height:9px;
+    background:#eceef5;
+    border-radius:999px;
+    overflow:hidden;
+    margin:22px 0 26px;
+  }
+  .bar{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    transition:width .25s ease;
+  }
+  .qnum{
+    color:var(--accent);
+    font-size:13px;
+    font-weight:700;
+    text-transform:uppercase;
+    margin-bottom:7px;
+  }
+  .question{
+    font-size:24px;
+    line-height:1.3;
+    font-weight:700;
+    margin-bottom:18px;
+  }
+  .answers{
+    display:grid;
+    gap:12px;
+  }
+  button.answer{
+    width:100%;
+    text-align:left;
+    padding:16px 18px;
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:14px;
+    font-size:16px;
+    cursor:pointer;
+    transition:.18s ease;
+  }
+  button.answer:hover{
+    border-color:var(--accent);
+    transform:translateY(-1px);
+    box-shadow:0 8px 20px rgba(107,92,255,.08);
+  }
+  .back{
+    margin-top:16px;
+    background:none;
+    border:0;
+    color:var(--muted);
+    cursor:pointer;
+    font-size:14px;
+  }
+  .result{display:none}
+  .score{
+    font-size:54px;
+    font-weight:800;
+    margin:4px 0 2px;
+  }
+  .status{
+    font-size:22px;
+    font-weight:700;
+    margin-bottom:8px;
+  }
+  .summary{
+    color:var(--muted);
+    line-height:1.55;
+    margin-bottom:22px;
+  }
+  .panel{
+    background:#f8f8fc;
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:18px;
+    margin:16px 0;
+  }
+  .panel h3{
+    margin:0 0 10px;
+    font-size:17px;
+  }
+  .panel ul{
+    margin:0;
+    padding-left:20px;
+    line-height:1.55;
+  }
+  .cta{
+    display:inline-block;
+    margin-top:10px;
+    width:100%;
+    padding:16px 18px;
+    background:var(--accent);
+    color:#fff;
+    text-align:center;
+    text-decoration:none;
+    border-radius:14px;
+    font-weight:700;
+    font-size:17px;
+  }
+  .reset{
+    width:100%;
+    margin-top:10px;
+    padding:14px 18px;
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .disclaimer{
+    margin-top:18px;
+    font-size:12px;
+    color:#7b8191;
+    line-height:1.45;
+  }
+  @media(max-width:600px){
+    h1{font-size:29px}
+    .question{font-size:21px}
+    .card{padding:22px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Expert Answers Prototype</div>
+
+  <div class="card" id="quizCard">
+    <h1>Small Claims Evidence Checker</h1>
+    <p class="intro">Answer a few quick questions to see how well organised your evidence currently looks and where there may be gaps.</p>
+
+    <div class="progress"><div class="bar" id="bar"></div></div>
+
+    <div id="quiz">
+      <div class="qnum" id="qnum"></div>
+      <div class="question" id="question"></div>
+      <div class="answers" id="answers"></div>
+      <button class="back" id="backBtn" onclick="goBack()">← Previous question</button>
+    </div>
+
+    <div class="result" id="result">
+      <div class="qnum">Your evidence readiness</div>
+      <div class="score" id="score"></div>
+      <div class="status" id="status"></div>
+      <div class="summary" id="summary"></div>
+
+      <div class="panel">
+        <h3>What looks useful</h3>
+        <ul id="strengths"></ul>
+      </div>
+
+      <div class="panel">
+        <h3>Possible gaps to look at</h3>
+        <ul id="gaps"></ul>
+      </div>
+
+      <div class="panel">
+        <h3>Your next practical step</h3>
+        <div id="nextStep"></div>
+      </div>
+
+      <a class="cta" href="#" onclick="alert('Prototype button: this would link into Expert Answers.'); return false;">Ask an Expert</a>
+      <button class="reset" onclick="restart()">Start again</button>
+
+      <div class="disclaimer">
+        This checker is for general information and preparation only. It does not provide legal advice, assess the merits of a claim, or guarantee any court outcome.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q:"Are you bringing the claim or defending one?",
+    options:[
+      {t:"I am making the claim", score:0, note:"Role identified"},
+      {t:"I am defending a claim", score:0, note:"Role identified"}
+    ]
+  },
+  {
+    q:"Do you have written evidence of what was agreed?",
+    options:[
+      {t:"Yes, clearly", score:2, strength:"Written evidence of the agreement"},
+      {t:"Some, but it is incomplete", score:1, gap:"The written agreement may need organising or filling out"},
+      {t:"No", score:0, gap:"Little or no written evidence of the agreement"}
+    ]
+  },
+  {
+    q:"Do you have proof of payment, invoices, receipts or bank records?",
+    options:[
+      {t:"Yes", score:2, strength:"Proof of payment or financial records"},
+      {t:"Some of it", score:1, gap:"Some payment records may still be missing"},
+      {t:"No", score:0, gap:"No clear proof of payment or financial records"}
+    ]
+  },
+  {
+    q:"Do you have emails, text messages, WhatsApp messages or letters about the dispute?",
+    options:[
+      {t:"Yes, plenty", score:2, strength:"Written communications about the dispute"},
+      {t:"A few", score:1, gap:"Communications may be incomplete"},
+      {t:"No", score:0, gap:"No written communications about the dispute"}
+    ]
+  },
+  {
+    q:"Do you have photos, videos or other visual evidence?",
+    options:[
+      {t:"Yes", score:2, strength:"Photo or video evidence"},
+      {t:"Some", score:1, gap:"Visual evidence may need organising or explaining"},
+      {t:"No", score:0, gap:"No visual evidence"}
+    ]
+  },
+  {
+    q:"Can you clearly show the amount of money you say you lost or owe?",
+    options:[
+      {t:"Yes, with figures and documents", score:2, strength:"A documented financial loss figure"},
+      {t:"I have a rough figure", score:1, gap:"The amount claimed may need clearer calculations and supporting documents"},
+      {t:"Not yet", score:0, gap:"The financial loss has not yet been clearly calculated"}
+    ]
+  },
+  {
+    q:"Have you made a simple timeline of what happened and when?",
+    options:[
+      {t:"Yes", score:2, strength:"A clear chronology or timeline"},
+      {t:"Partly", score:1, gap:"The timeline may need finishing"},
+      {t:"No", score:0, gap:"No clear timeline yet"}
+    ]
+  },
+  {
+    q:"If expert or independent evidence would help, do you have any?",
+    options:[
+      {t:"Yes", score:2, strength:"Independent or expert evidence"},
+      {t:"It may be needed but I do not have it", score:0, gap:"Consider whether independent or expert evidence is needed"},
+      {t:"It does not appear relevant", score:1}
+    ]
+  },
+  {
+    q:"Have you kept your important documents together in one place?",
+    options:[
+      {t:"Yes, organised", score:2, strength:"Documents are organised"},
+      {t:"They exist but are scattered", score:1, gap:"Evidence needs organising into one place"},
+      {t:"No", score:0, gap:"Evidence is not yet organised"}
+    ]
+  },
+  {
+    q:"Have you written down the main points you need to prove or challenge?",
+    options:[
+      {t:"Yes", score:2, strength:"The main issues are identified"},
+      {t:"Partly", score:1, gap:"The key issues may need sharpening"},
+      {t:"No", score:0, gap:"The key issues have not yet been clearly identified"}
+    ]
+  }
+];
+
+let index = 0;
+let answers = [];
+
+function render(){
+  document.getElementById("qnum").textContent = `Question ${index+1} of ${questions.length}`;
+  document.getElementById("question").textContent = questions[index].q;
+  document.getElementById("bar").style.width = `${(index/questions.length)*100}%`;
+  document.getElementById("backBtn").style.visibility = index===0 ? "hidden" : "visible";
+
+  const box = document.getElementById("answers");
+  box.innerHTML = "";
+  questions[index].options.forEach((opt, i)=>{
+    const b = document.createElement("button");
+    b.className = "answer";
+    b.textContent = opt.t;
+    b.onclick = ()=>choose(i);
+    box.appendChild(b);
+  });
+}
+
+function choose(i){
+  answers[index] = questions[index].options[i];
+  if(index < questions.length-1){
+    index++;
+    render();
+  } else {
+    showResult();
+  }
+}
+
+function goBack(){
+  if(index>0){ index--; render(); }
+}
+
+function showResult(){
+  document.getElementById("quiz").style.display = "none";
+  document.getElementById("result").style.display = "block";
+  document.getElementById("bar").style.width = "100%";
+
+  const maxScore = questions.slice(1).length * 2;
+  const total = answers.reduce((sum,a)=>sum+(a?.score||0),0);
+  const pct = Math.round((total/maxScore)*100);
+
+  let status, summary, nextStep;
+  if(pct >= 75){
+    status = "Good evidence foundation";
+    summary = "You appear to have many of the basic building blocks in place. The next job is making the evidence easy to follow and linking each item to the point it helps prove.";
+    nextStep = "Create a clean chronology, label your documents, and identify the 3 to 5 most important points in the dispute.";
+  } else if(pct >= 45){
+    status = "Some useful evidence, but there are gaps";
+    summary = "You have a workable starting point, but parts of the evidence may need strengthening or organising before you rely on it.";
+    nextStep = "Work through the gaps below first, then organise your strongest evidence into a simple timeline.";
+  } else {
+    status = "More preparation may be needed";
+    summary = "Your answers suggest that important parts of the evidence may still be missing, unclear or difficult to prove.";
+    nextStep = "Focus first on proof of the agreement, proof of payment or loss, written communications and a clear timeline of events.";
+  }
+
+  document.getElementById("score").textContent = pct + "%";
+  document.getElementById("status").textContent = status;
+  document.getElementById("summary").textContent = summary;
+  document.getElementById("nextStep").textContent = nextStep;
+
+  const strengths = [...new Set(answers.filter(a=>a?.strength).map(a=>a.strength))];
+  const gaps = [...new Set(answers.filter(a=>a?.gap).map(a=>a.gap))];
+
+  document.getElementById("strengths").innerHTML = strengths.length
+    ? strengths.map(x=>`<li>${x}</li>`).join("")
+    : "<li>No major strengths were identified from these answers yet.</li>";
+
+  document.getElementById("gaps").innerHTML = gaps.length
+    ? gaps.map(x=>`<li>${x}</li>`).join("")
+    : "<li>No obvious preparation gaps were identified by this basic checker.</li>";
+}
+
+function restart(){
+  index = 0;
+  answers = [];
+  document.getElementById("quiz").style.display = "block";
+  document.getElementById("result").style.display = "none";
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
